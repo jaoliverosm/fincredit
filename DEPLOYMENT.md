@@ -13,9 +13,24 @@
 1. Ve a [dashboard.render.com](https://dashboard.render.com)
 2. Click en "New +" → "Web Service"
 3. Conecta tu repositorio GitHub: `jaoliverosm/fincredit`
-4. Render detectará automáticamente el `render.yaml`
+4. **IMPORTANTE**: Render detectará automáticamente el `render.yaml` si está en la raíz del repositorio
 
-### 2. Configuración Automática (via render.yaml)
+### 2. Si Render NO detecta el render.yaml automáticamente:
+**Opción A - Usar el render.yaml existente:**
+1. Después de conectar el repositorio, busca la opción "Advanced Settings" o "Configure via render.yaml"
+2. Render debería detectar el archivo `render.yaml` en la raíz del repositorio
+3. Si no lo detecta, verifica que el archivo esté en: `f:\FinCredit\render.yaml`
+
+**Opción B - Configuración manual:**
+1. **Name**: fincredit-backend
+2. **Environment**: Docker
+3. **Dockerfile Path**: `./server/Dockerfile`
+4. **Plan**: Free
+5. **Region**: Oregon
+6. **Branch**: main
+7. **Health Check Path**: `/api/health`
+
+### 3. Configuración Automática (via render.yaml)
 El archivo `render.yaml` ya está configurado con:
 - **Nombre**: fincredit-backend
 - **Plan**: Free
@@ -24,7 +39,7 @@ El archivo `render.yaml` ya está configurado con:
 - **Health Check**: `/api/health`
 - **Base de datos**: PostgreSQL gratuita (fincredit-db)
 
-### 3. Variables de Entorno (Automáticas)
+### 4. Variables de Entorno (Automáticas)
 Render generará automáticamente:
 - `DATABASE_URL` (conectada a fincredit-db)
 - `JWT_SECRET` (generado automáticamente)
@@ -32,7 +47,7 @@ Render generará automáticamente:
 - `NODE_ENV`: `production`
 - `PORT`: `3001`
 
-### 4. Deploy
+### 5. Deploy
 Click en "Create Web Service" → Render desplegará automáticamente
 
 ---
