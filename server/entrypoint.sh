@@ -2,7 +2,7 @@
 set -e
 
 echo "Running Prisma migrations..."
-# npx prisma migrate deploy
+npx prisma migrate deploy 2>&1
 
 echo "Starting server..."
-node src/app.js
+exec node src/app.js

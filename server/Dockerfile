@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy server package files (Render context is repo root)
 COPY server/package*.json ./
-RUN npm ci --include=dev
+RUN npm ci
 
 # Generate Prisma client
 COPY server/prisma ./prisma/
@@ -20,10 +20,12 @@ WORKDIR /app
 COPY server/package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy generated Prisma client + schema
+# Copy generated Prisma client + schema + Prisma CLI for migrations
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/prisma ./prisma/
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/prisma ./prisma/
 
 # Copy source code
 COPY server/src/ ./src/
@@ -43,4 +45,4 @@ EXPOSE 3001
 ENV NODE_ENV=production
 ENV PORT=3001
 
-ENTRYPOINT ["./entrypoint.sh"]
+CMD ["./entrypoint.sh"]
