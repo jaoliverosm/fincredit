@@ -1,31 +1,130 @@
-# Despliegue local con Docker
+# 🚀 Guía de Despliegue - FinCredit
 
-Para desarrollo con **Vite + API en tu máquina** (puertos 5173 / 3001), consulta primero **[README-DEV.md](README-DEV.md)**.
+## 📋 Requisitos Previos
+- Cuenta en [Render](https://render.com) (gratis)
+- Cuenta en [Vercel](https://vercel.com) (gratis)
+- Repositorio en GitHub conectado
 
-1. Copia el archivo de ejemplo `.env.example` a `.env` y ajusta variables si es necesario.
+---
 
-```bash
-cp .env.example .env
+## 🔧 Backend - Despliegue en Render
+
+### 1. Conectar Repositorio a Render
+1. Ve a [dashboard.render.com](https://dashboard.render.com)
+2. Click en "New +" → "Web Service"
+3. Conecta tu repositorio GitHub: `jaoliverosm/fincredit`
+4. Render detectará automáticamente el `render.yaml`
+
+### 2. Configuración Automática (via render.yaml)
+El archivo `render.yaml` ya está configurado con:
+- **Nombre**: fincredit-backend
+- **Plan**: Free
+- **Región**: Oregon
+- **Docker**: Dockerfile en `./server/Dockerfile`
+- **Health Check**: `/api/health`
+- **Base de datos**: PostgreSQL gratuita (fincredit-db)
+
+### 3. Variables de Entorno (Automáticas)
+Render generará automáticamente:
+- `DATABASE_URL` (conectada a fincredit-db)
+- `JWT_SECRET` (generado automáticamente)
+- `FRONTEND_URL`: `https://fincredit-frontend.vercel.app`
+- `NODE_ENV`: `production`
+- `PORT`: `3001`
+
+### 4. Deploy
+Click en "Create Web Service" → Render desplegará automáticamente
+
+---
+
+## 🎨 Frontend - Despliegue en Vercel
+
+### 1. Conectar Repositorio a Vercel
+1. Ve a [vercel.com](https://vercel.com)
+2. Click en "Add New..." → "Project"
+3. Importa tu repositorio GitHub: `jaoliverosm/fincredit`
+4. Selecciona el directorio `client/`
+
+### 2. Configuración del Proyecto
+Vercel detectará automáticamente:
+- **Framework**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Install Command**: `npm install`
+
+### 3. Variables de Entorno
+Agrega las siguientes variables en Vercel:
+```
+VITE_API_URL=https://fincredit-backend.onrender.com/api
+VITE_FRONTEND_URL=https://fincredit-frontend.vercel.app
 ```
 
-2. Levantar servicios con `docker-compose`:
+### 4. Deploy
+Click en "Deploy" → Vercel desplegará automáticamente
 
-```bash
-docker-compose up --build
-```
+---
 
-- PostgreSQL estará en `localhost:5432`.
-- API del servidor en `http://localhost:3000`.
+## 🔄 GitHub Actions - CI/CD
 
-3. Inicializar Prisma (si usas Prisma):
+### 1. Actualizar Secrets en GitHub
+Necesitas agregar estos secrets en tu repositorio:
+- `RENDER_TOKEN`: Token de autenticación de Render
+- `VERCEL_TOKEN`: Token de autenticación de Vercel
 
-```bash
-# entrar al contenedor server (o ejecutar localmente)
-npx prisma migrate deploy
-npx prisma db seed
-```
+### 2. Obtener Tokens
 
-4. Notas de producción
-- Configure `DATABASE_URL` para apuntar a su instancia de PostgreSQL administrada.
-- Use secretos de GitHub para `JWT_SECRET` y credenciales de la base de datos.
-- Configure CI para construir y publicar imágenes, o despliegue en la plataforma de su elección.
+#### Render Token
+1. Ve a [dashboard.render.com](https://dashboard.render.com)
+2. Click en tu avatar → "Account Settings"
+3. Scroll a "API Keys"
+4. Click "Create API Key"
+5. Copia el token y agrégalo a GitHub Secrets como `RENDER_TOKEN`
+
+#### Vercel Token
+1. Ve a [vercel.com](https://vercel.com)
+2. Click en tu avatar → "Settings"
+3. Scroll a "Tokens"
+4. Click "Create Token"
+5. Copia el token y agrégalo a GitHub Secrets como `VERCEL_TOKEN`
+
+### 3. Workflow de GitHub Actions
+El workflow `.github/workflows/deploy.yml` se ejecutará automáticamente en cada push a `main`.
+
+---
+
+## ✅ Verificación
+
+### Backend
+- URL: `https://fincredit-backend.onrender.com`
+- Health Check: `https://fincredit-backend.onrender.com/api/health`
+- API Docs: `https://fincredit-backend.onrender.com/api`
+
+### Frontend
+- URL: `https://fincredit-frontend.vercel.app`
+- Login: `https://fincredit-frontend.vercel.app/login`
+
+---
+
+## 🔧 Troubleshooting
+
+### Backend no responde
+- Verifica los logs en Render Dashboard
+- Asegúrate que la base de datos esté conectada
+- Verifica que el puerto 3001 esté expuesto
+
+### Frontend no conecta al backend
+- Verifica que `VITE_API_URL` esté configurado correctamente en Vercel
+- Verifica CORS en el backend
+- Verifica que el backend esté desplegado y funcionando
+
+### Build falla
+- Verifica que todas las dependencias estén en package.json
+- Verifica que el Dockerfile sea correcto
+- Verifica que las variables de entorno estén configuradas
+
+---
+
+## 📞 Soporte
+- [Render Docs](https://render.com/docs)
+- [Vercel Docs](https://vercel.com/docs)
+- [GitHub Actions Docs](https://docs.github.com/en/actions)
