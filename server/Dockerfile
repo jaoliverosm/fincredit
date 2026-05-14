@@ -1,44 +1,21 @@
-# Multi-stage build for optimization
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy server package files (Render context is repo root)
+# Copy package files from repo root context
 COPY server/package*.json ./
-RUN npm ci
 
-# Generate Prisma client
+# Install all dependencies (prisma now in deps)
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy Prisma schema and generate client
 COPY server/prisma ./prisma/
 RUN npx prisma generate
 
-# Production stage
-FROM node:18-alpine AS production
-
-WORKDIR /app
-
-# Install only production dependencies
-COPY server/package*.json ./
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy generated Prisma client + schema + Prisma CLI for migrations
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /app/prisma ./prisma/
-
 # Copy source code
 COPY server/src/ ./src/
-
-# Copy entrypoint script
-COPY server/entrypoint.sh ./entrypoint.sh
+COPY server/entrypoint.sh ./
 RUN chmod +x entrypoint.sh
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S fincredit -u 1001 && \
-    chown -R fincredit:nodejs /app
-USER fincredit
 
 EXPOSE 3001
 
