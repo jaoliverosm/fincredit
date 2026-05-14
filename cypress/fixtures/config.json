@@ -1,0 +1,9 @@
+{
+  "tasaDefault": 2.5,
+  "cuotasMax": 36,
+  "cuotasMin": 1,
+  "montoMaxPrestamo": 50000000,
+  "montoMinPrestamo": 100000,
+  "nombreEmpresa": "FinCredit",
+  "moneda": "COP"
+}

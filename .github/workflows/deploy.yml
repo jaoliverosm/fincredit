@@ -1,0 +1,51 @@
+name: Deploy automático (tags)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preparar variables
+        run: |
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Mostrar tag detectado
+        run: |
+          echo "Se ha detectado un tag: $TAG"
+
+      - name: Instalar Render CLI
+        if: ${{ secrets.RENDER_TOKEN != '' }}
+        run: |
+          echo "Descargando Render CLI..."
+          curl -s https://render.com/install/cli.sh | bash
+          export PATH=$PATH:~/.render/bin
+
+      - name: Login a Render
+        if: ${{ secrets.RENDER_TOKEN != '' }}
+        env:
+          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+        run: |
+          echo "Iniciando sesión en Render..."
+          echo "$RENDER_TOKEN" | render login --token
+
+      - name: Desplegar en Render
+        if: ${{ secrets.RENDER_TOKEN != '' }}
+        run: |
+          echo "Desplegando servicio en Render..."
+          render deploy --yes
+
+      - name: Fallback: instrucciones manuales
+        if: ${{ secrets.RENDER_TOKEN == '' }}
+        run: |
+          echo "No hay credenciales Render configuradas. Por favor configura el secret RENDER_TOKEN para habilitar el despliegue automático."
+          echo "Puedes usar el job 'build-and-push' para publicar imágenes en GHCR/Docker Hub y luego promover en Render manualmente."

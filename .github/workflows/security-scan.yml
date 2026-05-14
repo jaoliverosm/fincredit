@@ -1,0 +1,27 @@
+name: Security - Trivy scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build server image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: false
+          tags: fincredit-server:ci
+
+      - name: Run Trivy container scan
+        uses: aquasecurity/trivy-action@v1
+        with:
+          image-ref: fincredit-server:ci
+          format: 'table'

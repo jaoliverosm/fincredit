@@ -1,0 +1,220 @@
+{
+  "$schema": "https://www.artillery.io/schemas/artillery-2.0.0.json",
+  "config": {
+    "target": "http://localhost:3000",
+    "phases": [
+      {
+        "duration": 60,
+        "arrivalRate": 10,
+        "name": "Warm-up phase",
+        "rampTo": 20
+      },
+      {
+        "duration": 120,
+        "arrivalRate": 20,
+        "name": "Sustained load phase"
+      },
+      {
+        "duration": 60,
+        "arrivalRate": 20,
+        "rampTo": 50,
+        "name": "Stress ramp-up phase"
+      },
+      {
+        "duration": 120,
+        "arrivalRate": 50,
+        "name": "Peak load phase"
+      },
+      {
+        "duration": 60,
+        "arrivalRate": 50,
+        "rampTo": 0,
+        "name": "Cool-down phase"
+      }
+    ],
+    "payload": {
+      "fields": [
+        { "name": "token", "path": "auth.token" }
+      ]
+    },
+    "processors": [
+      "./processors/extract-token.js"
+    ],
+    "ensure": {
+      "maxErrorRate": 5,
+      "minRate": 5,
+      "p99": 200,
+      "p95": 100
+    }
+  },
+  "scenarios": [
+    {
+      "name": "Authentication flow",
+      "weight": 20,
+      "flow": [
+        {
+          "post": {
+            "url": "/api/auth/login",
+            "json": {
+              "email": "supervisor@test.com",
+              "password": "test123"
+            },
+            "capture": [
+              { "json": "$.data.token", "as": "auth_token", "strict": false }
+            ]
+          }
+        },
+        {
+          "get": {
+            "url": "/api/dashboard/supervisor",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read-only operations",
+      "weight": 40,
+      "flow": [
+        {
+          "post": {
+            "url": "/api/auth/login",
+            "json": {
+              "email": "empleado@test.com",
+              "password": "test123"
+            },
+            "capture": [
+              { "json": "$.data.token", "as": "auth_token", "strict": false }
+            ]
+          }
+        },
+        {
+          "think": 1,
+          "get": {
+            "url": "/api/prestamos?estado=ACTIVO",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        },
+        {
+          "think": 1,
+          "get": {
+            "url": "/api/clientes",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        },
+        {
+          "think": 1,
+          "get": {
+            "url": "/api/articulos",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        },
+        {
+          "think": 2,
+          "get": {
+            "url": "/api/dashboard/empleado",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Write operations - Loan creation",
+      "weight": 25,
+      "flow": [
+        {
+          "post": {
+            "url": "/api/auth/login",
+            "json": {
+              "email": "empleado@test.com",
+              "password": "test123"
+            },
+            "capture": [
+              { "json": "$.data.token", "as": "auth_token", "strict": false }
+            ]
+          }
+        },
+        {
+          "post": {
+            "url": "/api/prestamos",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            },
+            "json": {
+              "clienteId": "{{ $randomNumber(1, 50) }}",
+              "monto": "{{ $randomNumber(100000, 5000000) }}",
+              "interes": "{{ $randomNumber(10, 25) }}",
+              "cuotas": "{{ $randomNumber(6, 24) }}",
+              "observacion": "Préstamo de carga"
+            }
+          }
+        },
+        {
+          "think": 2
+        },
+        {
+          "get": {
+            "url": "/api/prestamos/estadisticas",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Write operations - Sales",
+      "weight": 15,
+      "flow": [
+        {
+          "post": {
+            "url": "/api/auth/login",
+            "json": {
+              "email": "empleado@test.com",
+              "password": "test123"
+            },
+            "capture": [
+              { "json": "$.data.token", "as": "auth_token", "strict": false }
+            ]
+          }
+        },
+        {
+          "post": {
+            "url": "/api/ventas",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            },
+            "json": {
+              "clienteId": "{{ $randomNumber(1, 50) }}",
+              "articuloId": "{{ $randomNumber(1, 20) }}",
+              "cantidad": "{{ $randomNumber(1, 5) }}",
+              "cuotas": "{{ $randomNumber(3, 12) }}",
+              "interes": 15
+            }
+          }
+        },
+        {
+          "think": 2
+        },
+        {
+          "get": {
+            "url": "/api/ventas",
+            "headers": {
+              "Authorization": "Bearer {{ auth_token }}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

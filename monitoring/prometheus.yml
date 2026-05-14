@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'fincredit-server'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['server:3000']
+
+  - job_name: 'fincredit-health'
+    metrics_path: /health
+    static_configs:
+      - targets: ['server:3000']
+
+# Nota: asegúrate de exponer /metrics o /health en la API para que Prometheus pueda monitorearla

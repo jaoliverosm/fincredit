@@ -1,0 +1,68 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["Docker Build and Push"]
+    types:
+      - completed
+    branches: [main]
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+
+jobs:
+  deploy-railway:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.RAILWAY_TOKEN != '' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Railway CLI
+      run: |
+        npm install -g @railway/cli
+
+    - name: Deploy to Railway
+      run: |
+        echo "${{ secrets.RAILWAY_TOKEN }}" | railway login --token
+        railway up --service ${{ secrets.RAILWAY_SERVICE_ID }}
+
+    - name: Verify deployment
+      run: |
+        railway status --service ${{ secrets.RAILWAY_SERVICE_ID }}
+
+  deploy-render:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.RENDER_TOKEN != '' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Render
+      uses: johnnyhuy/render-deploy-action@v1.0.0
+      with:
+        service-id: ${{ secrets.RENDER_SERVICE_ID }}
+        api-key: ${{ secrets.RENDER_TOKEN }}
+        wait-for-success: true
+
+  health-check:
+    needs: [deploy-railway, deploy-render]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Wait for deployment
+      run: sleep 30
+
+    - name: Health check
+      run: |
+        curl -f ${{ secrets.APP_URL }}/health || exit 1
+
+    - name: Notify deployment
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

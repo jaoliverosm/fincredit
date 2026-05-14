@@ -1,0 +1,17 @@
+{
+  "supervisor": {
+    "email": "admin@fincredit.com",
+    "password": "admin123",
+    "nombre": "Admin"
+  },
+  "empleado": {
+    "email": "juan@fincredit.com",
+    "password": "empleado1",
+    "nombre": "Juan Pérez"
+  },
+  "cliente": {
+    "email": "carlos@gmail.com",
+    "password": "cliente1",
+    "nombre": "Carlos García"
+  }
+}
