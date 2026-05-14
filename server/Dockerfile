@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files from repo root context
 COPY server/package*.json ./
 
-# Install all dependencies (prisma now in deps)
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies (including dev for Prisma generation)
+RUN npm ci && npm cache clean --force
 
 # Copy Prisma schema and generate client
 COPY server/prisma ./prisma/
