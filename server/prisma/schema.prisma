@@ -1,28 +1,32 @@
-
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model Usuario {
-  id          Int       @id @default(autoincrement())
-  nombre      String
-  email       String    @unique
-  password    String
-  rol         Rol
-  activo      Boolean   @default(true)
-  creadoEn    DateTime  @default(now())
-  cliente     Cliente?
-  empleado    Empleado?
-  prestamo    Prestamo[]
-  venta       VentaCredito[]
-  pago        Pago[]
-  solicitudAsignada Solicitud[] @relation("SolicitudAsignada")
-  clientesRegistrados Cliente[] @relation("ClienteEmpleado")
+  id                Int           @id @default(autoincrement())
+  nombre            String
+  email             String        @unique
+  password          String
+  rol               Rol
+  activo            Boolean       @default(true)
+  creadoEn          DateTime      @default(now())
+  cliente           Cliente?
+  empleado          Empleado?
+  clientesRegistrados Cliente[]  @relation("ClienteRegistradoPor")
+  prestamos         Prestamo[]
+  ventas            VentaCredito[]
+  pagos             Pago[]
+  solicitudesEnviadas Solicitud[] @relation("SolicitudEnviada")
+  solicitudesAsignadas Solicitud[] @relation("SolicitudAsignada")
+
   @@map("usuarios")
 }
+
 model Empleado {
   id           Int      @id @default(autoincrement())
   usuarioId    Int      @unique
@@ -30,42 +34,48 @@ model Empleado {
   telefono     String?
   meta         Float    @default(0)
   fechaIngreso DateTime @default(now())
+
   @@map("empleados")
 }
+
 model Cliente {
-  id             Int      @id @default(autoincrement())
-  usuarioId      Int      @unique
-  usuario        Usuario  @relation(fields: [usuarioId], references: [id])
-  cedula         String   @unique
+  id             Int             @id @default(autoincrement())
+  usuarioId      Int             @unique
+  usuario        Usuario         @relation(fields: [usuarioId], references: [id])
+  cedula         String          @unique
   telefono       String?
   empleadoId     Int?
-  empleado       Usuario? @relation("ClienteEmpleado", fields: [empleadoId], references: [id])
-  estado         EstadoCliente @default(activo)
-  fechaRegistro  DateTime @default(now())
+  empleado       Usuario?        @relation("ClienteRegistradoPor", fields: [empleadoId], references: [id])
+  estado         EstadoCliente   @default(activo)
+  fechaRegistro  DateTime        @default(now())
   prestamos      Prestamo[]
   ventas         VentaCredito[]
   pagos          Pago[]
   solicitudes    Solicitud[]
+
   @@map("clientes")
 }
+
 model Prestamo {
-  id               Int      @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   clienteId        Int
-  cliente          Cliente  @relation(fields: [clienteId], references: [id])
+  cliente          Cliente        @relation(fields: [clienteId], references: [id])
   empleadoId       Int
-  empleado         Usuario  @relation(fields: [empleadoId], references: [id])
+  empleado         Usuario        @relation(fields: [empleadoId], references: [id])
   monto            Float
   interes          Float
   cuotas           Int
   cuotaMensual     Float
-  pagado           Float    @default(0)
-  fechaInicio      DateTime @default(now())
+  pagado           Float          @default(0)
+  fechaInicio      DateTime       @default(now())
   fechaVencimiento DateTime
   estado           EstadoPrestamo @default(activo)
   observacion      String?
-  pagos            Pago[] @relation("PagoPrestamo")
+  pagos            Pago[]         @relation("PagoPrestamo")
+
   @@map("prestamos")
 }
+
 model Articulo {
   id          Int     @id @default(autoincrement())
   nombre      String
@@ -78,76 +88,88 @@ model Articulo {
   creadoEn    DateTime @default(now())
   ventas      VentaCredito[]
   solicitudes Solicitud[]
+
   @@map("articulos")
 }
+
 model VentaCredito {
-  id               Int      @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   clienteId        Int
-  cliente          Cliente  @relation(fields: [clienteId], references: [id])
+  cliente          Cliente        @relation(fields: [clienteId], references: [id])
   empleadoId       Int
-  empleado         Usuario  @relation(fields: [empleadoId], references: [id])
+  empleado         Usuario        @relation(fields: [empleadoId], references: [id])
   articuloId       Int
-  articulo         Articulo @relation(fields: [articuloId], references: [id])
+  articulo         Articulo       @relation(fields: [articuloId], references: [id])
   cantidad         Int
   precioUnitario   Float
   precioTotal      Float
   interes          Float
   cuotas           Int
   cuotaMensual     Float
-  pagado           Float    @default(0)
-  fechaVenta       DateTime @default(now())
+  pagado           Float          @default(0)
+  fechaVenta       DateTime       @default(now())
   fechaVencimiento DateTime
   estado           EstadoPrestamo @default(activo)
   observacion      String?
-  pagos            Pago[] @relation("PagoVenta")
+  pagos            Pago[]         @relation("PagoVenta")
+
   @@map("ventas_credito")
 }
+
 model Pago {
   id            Int      @id @default(autoincrement())
   tipo          TipoPago
   referenciaId  Int
   prestamoId    Int?
   prestamo      Prestamo? @relation("PagoPrestamo", fields: [prestamoId], references: [id])
-  ventaCreditoId Int?
-  ventaCredito  VentaCredito? @relation("PagoVenta", fields: [ventaCreditoId], references: [id])
+  ventaId       Int?
+  venta         VentaCredito? @relation("PagoVenta", fields: [ventaId], references: [id])
   clienteId     Int
-  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  cliente           Cliente         @relation(fields: [clienteId], references: [id])
   empleadoId    Int
   empleado      Usuario  @relation(fields: [empleadoId], references: [id])
   monto         Float
   fecha         DateTime @default(now())
   metodo        String?
   observacion   String?
+
   @@map("pagos")
 }
+
 model Solicitud {
-  id            Int         @id @default(autoincrement())
+  id            Int             @id @default(autoincrement())
   clienteId     Int
-  cliente       Cliente     @relation(fields: [clienteId], references: [id])
+  cliente       Cliente         @relation(fields: [clienteId], references: [id])
   empleadoId    Int?
-  empleado      Usuario?    @relation("SolicitudAsignada", fields: [empleadoId], references: [id])
+  empleado      Usuario?        @relation("SolicitudAsignada", fields: [empleadoId], references: [id])
+  creadoPorId   Int?
+  creadoPor     Usuario?        @relation("SolicitudEnviada", fields: [creadoPorId], references: [id])
   tipo          TipoSolicitud
   monto         Float?
   cuotas        Int?
   articuloId    Int?
-  articulo      Articulo?   @relation(fields: [articuloId], references: [id])
+  articulo      Articulo?       @relation(fields: [articuloId], references: [id])
   mensaje       String?
   respuesta     String?
-  fecha         DateTime    @default(now())
+  fecha         DateTime        @default(now())
   estado        EstadoSolicitud @default(pendiente)
+
   @@map("solicitudes")
 }
+
 model Configuracion {
-  id              Int     @id @default(autoincrement())
-  tasaDefault     Float   @default(2.5)
-  cuotasMax       Int     @default(36)
-  cuotasMin       Int     @default(1)
-  montoMaxPrestamo Float  @default(50000000)
-  montoMinPrestamo Float  @default(100000)
-  nombreEmpresa   String  @default("FinCredit")
-  moneda          String  @default("COP")
+  id              Int    @id @default(autoincrement())
+  tasaDefault     Float  @default(2.5)
+  cuotasMax       Int    @default(36)
+  cuotasMin       Int    @default(1)
+  montoMaxPrestamo Float @default(50000000)
+  montoMinPrestamo Float @default(100000)
+  nombreEmpresa   String @default("FinCredit")
+  moneda          String @default("COP")
+
   @@map("configuracion")
 }
+
 enum Rol {
   supervisor
   empleado

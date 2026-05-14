@@ -113,7 +113,7 @@ CREATE TABLE "pagos" (
     "tipo" "TipoPago" NOT NULL,
     "referenciaId" INTEGER NOT NULL,
     "prestamoId" INTEGER,
-    "ventaCreditoId" INTEGER,
+    "ventaId" INTEGER,
     "clienteId" INTEGER NOT NULL,
     "empleadoId" INTEGER NOT NULL,
     "monto" DOUBLE PRECISION NOT NULL,
@@ -129,6 +129,7 @@ CREATE TABLE "solicitudes" (
     "id" SERIAL NOT NULL,
     "clienteId" INTEGER NOT NULL,
     "empleadoId" INTEGER,
+    "creadoPorId" INTEGER,
     "tipo" "TipoSolicitud" NOT NULL,
     "monto" DOUBLE PRECISION,
     "cuotas" INTEGER,
@@ -195,7 +196,7 @@ ALTER TABLE "ventas_credito" ADD CONSTRAINT "ventas_credito_articuloId_fkey" FOR
 ALTER TABLE "pagos" ADD CONSTRAINT "pagos_prestamoId_fkey" FOREIGN KEY ("prestamoId") REFERENCES "prestamos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "pagos" ADD CONSTRAINT "pagos_ventaCreditoId_fkey" FOREIGN KEY ("ventaCreditoId") REFERENCES "ventas_credito"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "pagos" ADD CONSTRAINT "pagos_ventaId_fkey" FOREIGN KEY ("ventaId") REFERENCES "ventas_credito"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "pagos" ADD CONSTRAINT "pagos_clienteId_fkey" FOREIGN KEY ("clienteId") REFERENCES "clientes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -208,6 +209,9 @@ ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_clienteId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_empleadoId_fkey" FOREIGN KEY ("empleadoId") REFERENCES "usuarios"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_creadoPorId_fkey" FOREIGN KEY ("creadoPorId") REFERENCES "usuarios"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_articuloId_fkey" FOREIGN KEY ("articuloId") REFERENCES "articulos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
