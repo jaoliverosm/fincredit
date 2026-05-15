@@ -12,7 +12,7 @@ export const getArticulos = async (req, res, next) => {
         { descripcion: { contains: search, mode: 'insensitive' } }
       ];
     }
-    const articulos = await prisma.articulo.findMany({ where, orderBy: { createdAt: 'desc' } });
+    const articulos = await prisma.articulo.findMany({ where, orderBy: { id: 'desc' } });
     res.json({ articulos });
   } catch (error) { next(error); }
 };

@@ -3,12 +3,12 @@ import { prisma } from '../app.js';
 
 const getSolicitudesFilter = (req) => {
   if (req.rol === 'cliente') {
-    const cliente = req.usuario.cliente;
+    const cliente = req.user.cliente;
     if (!cliente) return { id: -1 };
     return { clienteId: cliente.id };
   }
   if (req.rol === 'empleado') {
-    const empleado = req.usuario.empleado;
+    const empleado = req.user.empleado;
     if (!empleado) return { id: -1 };
     return { empleadoId: empleado.id };
   }
@@ -21,7 +21,7 @@ export const getSolicitudes = async (req, res, next) => {
     const solicitudes = await prisma.solicitud.findMany({
       where,
       include: { cliente: { include: { usuario: true } }, empleado: { include: { usuario: true } }, articulo: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { fecha: 'desc' }
     });
     res.json({ solicitudes });
   } catch (error) { next(error); }

@@ -16,6 +16,7 @@ const SupervisorDashboard = lazy(() => import('./pages/supervisor/Dashboard'));
 const Articulos = lazy(() => import('./pages/supervisor/Articulos'));
 const Clientes = lazy(() => import('./pages/supervisor/Clientes'));
 const Empleados = lazy(() => import('./pages/supervisor/Empleados'));
+const DetalleEmpleado = lazy(() => import('./pages/supervisor/DetalleEmpleado'));
 const Prestamos = lazy(() => import('./pages/supervisor/Prestamos'));
 const Ventas = lazy(() => import('./pages/supervisor/Ventas'));
 const Solicitudes = lazy(() => import('./pages/supervisor/Solicitudes'));
@@ -64,6 +65,7 @@ function App() {
             React.createElement(Route, { path: 'articulos', element: React.createElement(Articulos) }),
             React.createElement(Route, { path: 'clientes', element: React.createElement(Clientes) }),
             React.createElement(Route, { path: 'empleados', element: React.createElement(Empleados) }),
+            React.createElement(Route, { path: 'empleados/:id', element: React.createElement(DetalleEmpleado) }),
             React.createElement(Route, { path: 'prestamos', element: React.createElement(Prestamos) }),
             React.createElement(Route, { path: 'prestamos/:id', element: React.createElement(Prestamos) }),
             React.createElement(Route, { path: 'pagos', element: React.createElement(Pagos) }),

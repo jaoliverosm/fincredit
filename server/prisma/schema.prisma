@@ -30,14 +30,31 @@ model Usuario {
 }
 
 model Empleado {
-  id           Int      @id @default(autoincrement())
-  usuarioId    Int      @unique
-  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
-  telefono     String?
-  meta         Float    @default(0)
-  fechaIngreso DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  usuarioId       Int      @unique
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  telefono        String?
+  meta            Float    @default(0)
+  fechaIngreso    DateTime @default(now())
+  direccion       String?
+  fechaNacimiento DateTime?
+  fotoUrl         String?
+  hojaDeVidaUrl   String?
+  recursos        RecursoAsignado[]
 
   @@map("empleados")
+}
+
+model RecursoAsignado {
+  id              Int      @id @default(autoincrement())
+  empleadoId      Int
+  empleado        Empleado @relation(fields: [empleadoId], references: [id])
+  tipo            String   // celular | tablet | sim | equipo | otro
+  nombre          String
+  descripcion     String?
+  fechaAsignacion DateTime @default(now())
+
+  @@map("recursos_asignados")
 }
 
 model Cliente {

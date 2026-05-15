@@ -7,7 +7,7 @@ import Badge from '../components/ui/Badge';
 import ThemeToggle from '../components/ThemeToggle';
 import ConfirmModal from '../components/ConfirmModal';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
 
 export default function BaseLayout({ menuItems }) {
   const { logout, rol } = useAuthStore();
@@ -31,21 +31,21 @@ export default function BaseLayout({ menuItems }) {
     navigate('/login', { replace: true });
   };
 
-  return React.createElement('div', { className: 'flex h-screen bg-gray-50' },
+  return React.createElement('div', { className: 'flex h-screen bg-background' },
     sidebarOpen && React.createElement('div', {
       className: 'fixed inset-0 bg-black/30 z-40 lg:hidden',
       onClick: () => setSidebarOpen(false)
     }),
 
     React.createElement('aside', {
-      className: 'fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transition-transform ' + (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
+      className: 'fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transition-transform ' + (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
     },
-      React.createElement('div', { className: 'p-4 border-b flex items-center justify-between' },
+      React.createElement('div', { className: 'p-4 border-b border-border flex items-center justify-between' },
         React.createElement('div', { className: 'flex items-center gap-2' },
           logoUrl
             ? React.createElement('img', { src: API_URL + logoUrl, alt: empresa, className: 'h-8 w-auto' })
-            : React.createElement(Landmark, { className: 'text-primary-600', size: 28 }),
-          React.createElement('h1', { className: 'text-xl font-bold text-primary-600' }, empresa)
+            : React.createElement(Landmark, { className: 'text-primary', size: 28 }),
+          React.createElement('h1', { className: 'text-xl font-bold text-primary' }, empresa)
         ),
         React.createElement('button', { onClick: () => setSidebarOpen(false), className: 'lg:hidden' },
           React.createElement(X, { size: 20 })
@@ -56,7 +56,7 @@ export default function BaseLayout({ menuItems }) {
           React.createElement('button', {
             key: item.path,
             onClick: () => { navigate(item.path); setSidebarOpen(false); },
-            className: 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition'
+            className: 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition'
           },
             React.createElement('span', null, item.icon),
             item.label
@@ -66,7 +66,7 @@ export default function BaseLayout({ menuItems }) {
     ),
 
     React.createElement('div', { className: 'flex-1 flex flex-col overflow-hidden' },
-      React.createElement('header', { className: 'bg-white border-b px-4 py-3 flex items-center justify-between' },
+      React.createElement('header', { className: 'bg-card border-b border-border px-4 py-3 flex items-center justify-between' },
         React.createElement('button', { onClick: () => setSidebarOpen(true), className: 'lg:hidden', 'aria-label': 'Abrir men\u00FA' },
           React.createElement(Menu, { size: 24 })
         ),
@@ -76,14 +76,14 @@ export default function BaseLayout({ menuItems }) {
           React.createElement(Badge, null, rol?.toUpperCase() ?? ''),
           React.createElement('button', {
             onClick: () => setShowLogout(true),
-            className: 'flex items-center gap-1 text-sm text-gray-600 hover:text-red-500 transition'
+            className: 'flex items-center gap-1 text-sm text-muted-foreground hover:text-destructive transition'
           },
             React.createElement(LogOut, { size: 16 }),
             'Cerrar sesi\u00F3n'
           )
         )
       ),
-      React.createElement('main', { className: 'flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6' },
+      React.createElement('main', { className: 'flex-1 overflow-y-auto bg-background p-4 md:p-6' },
         React.createElement(Outlet, null)
       )
     ),

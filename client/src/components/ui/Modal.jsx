@@ -26,12 +26,19 @@ export default function Modal({ open, onClose, children, title, size = 'md' }) {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
-    setTimeout(() => { contentRef.current?.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])')?.focus(); }, 50);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [open, handleKeyDown]);
+
+  useEffect(() => {
+    if (!open) return;
+    const timer = setTimeout(() => {
+      contentRef.current?.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])')?.focus();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [open]);
 
   if (!open) return null;
 

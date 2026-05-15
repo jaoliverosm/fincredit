@@ -5,6 +5,8 @@ import { formatCurrency, formatEstado } from '../../utils/format';
 import { Users, CreditCard, AlertTriangle, DollarSign, ShoppingCart, TrendingUp, ArrowRight, Wallet, Timer } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
+
 export default function EmpleadoDashboard() {
   const navigate = useNavigate();
   const user = useAuthStore(s => s.user);
@@ -47,9 +49,17 @@ export default function EmpleadoDashboard() {
       {/* Welcome + Meta */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-8 bg-white p-6 rounded-xl border border-[#c5c5d3] shadow-sm flex flex-col justify-between">
-          <div>
-            <h2 className="text-[24px] font-semibold text-[#00236f] mb-1">Bienvenido de nuevo, {user?.nombre || 'Empleado'}</h2>
-            <p className="text-[16px] text-[#444651]">Aquí tienes el resumen de tu desempeño.</p>
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 flex-shrink-0">
+              {user?.empleado?.fotoUrl
+                ? React.createElement('img', { src: API_URL + user.empleado.fotoUrl, alt: 'Foto', className: 'w-full h-full object-cover' })
+                : React.createElement('div', { className: 'w-full h-full bg-[#dce1ff] flex items-center justify-center text-[#00164e] font-bold text-xl' }, (user?.nombre || '?').charAt(0).toUpperCase())
+              }
+            </div>
+            <div>
+              <h2 className="text-[24px] font-semibold text-[#00236f] mb-1">Bienvenido de nuevo, {user?.nombre || 'Empleado'}</h2>
+              <p className="text-[16px] text-[#444651]">Aquí tienes el resumen de tu desempeño.</p>
+            </div>
           </div>
           <div className="mt-6">
             <div className="flex justify-between items-end mb-1">

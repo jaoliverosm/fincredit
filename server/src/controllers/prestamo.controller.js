@@ -14,7 +14,7 @@ export const getPrestamos = async (req, res, next) => {
     const where = getPrestamosFilter(req);
     const prestamos = await prisma.prestamo.findMany({
       where,
-      include: { cliente: { include: { usuario: true } }, empleado: { include: { usuario: true } } },
+      include: { cliente: { include: { usuario: true } }, empleado: true },
       orderBy: { id: 'desc' }
     });
     res.json({ prestamos });

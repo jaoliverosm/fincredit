@@ -51,7 +51,10 @@ const authenticateToken = async (req, res, next) => {
             id: true,
             telefono: true,
             meta: true,
-            fechaIngreso: true
+            fechaIngreso: true,
+            direccion: true,
+            fechaNacimiento: true,
+            fotoUrl: true
           }
         },
         cliente: {

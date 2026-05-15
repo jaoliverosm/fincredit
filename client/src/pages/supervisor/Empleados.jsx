@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { api } from '../../store/authStore';
 import Card from '../../components/ui/Card';
@@ -11,7 +12,10 @@ import Badge from '../../components/ui/Badge';
 import ConfirmModal from '../../components/ConfirmModal';
 import { formatCurrency } from '../../utils/format';
 
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace('/api', '');
+
 export default function EmpleadosPage() {
+  const navigate = useNavigate();
   const [empleados, setEmpleados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -75,14 +79,22 @@ export default function EmpleadosPage() {
     React.createElement(Card, null,
       React.createElement(Table, {
         columns: [
-          { key: 'nombre', label: 'Nombre', render: r => r.usuario.nombre },
-          { key: 'email', label: 'Email', render: r => r.usuario.email },
+          { key: 'foto', label: '', render: r =>
+            React.createElement('div', { className: 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden' },
+              r.fotoUrl
+                ? React.createElement('img', { src: API_URL + r.fotoUrl, alt: '', className: 'w-full h-full object-cover' })
+                : React.createElement('span', { className: 'text-xs font-bold text-gray-500' }, (r.usuario?.nombre || '?').charAt(0).toUpperCase())
+            )
+          },
+          { key: 'nombre', label: 'Nombre', render: r => r.usuario?.nombre },
+          { key: 'email', label: 'Email', render: r => r.usuario?.email },
           { key: 'telefono', label: 'Teléfono' },
+          { key: 'direccion', label: 'Dirección', render: r => r.direccion || '-' },
           { key: 'meta', label: 'Meta', render: r => r.meta ? formatCurrency(r.meta) : '-' },
           { key: 'estado', label: 'Estado', render: r => r.usuario?.activo ? React.createElement(Badge, { variant: 'success' }, 'Activo') : React.createElement(Badge, { variant: 'danger' }, 'Inactivo') }
         ],
         data: empleados,
-        onRowClick: openEdit,
+        onRowClick: (r) => navigate('/supervisor/empleados/' + r.id),
         actions: (r) => React.createElement('div', { className: 'flex gap-2' },
           React.createElement(Button, { size: 'sm', variant: 'outline', onClick: (e) => { e.stopPropagation(); openEdit(r); } }, 'Editar'),
           React.createElement(Button, { size: 'sm', variant: 'danger', onClick: (e) => { e.stopPropagation(); setConfirmDelete(r.id); } }, 'Eliminar')

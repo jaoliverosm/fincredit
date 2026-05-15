@@ -13,7 +13,7 @@ export const getVentas = async (req, res, next) => {
     const where = getVentasFilter(req);
     const ventas = await prisma.ventaCredito.findMany({
       where,
-      include: { cliente: { include: { usuario: true } }, empleado: { include: { usuario: true } }, articulo: true, pagos: true },
+      include: { cliente: { include: { usuario: true } }, empleado: true, articulo: true, pagos: true },
       orderBy: { id: 'desc' }
     });
     res.json({ ventas });
