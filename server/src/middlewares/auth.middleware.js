@@ -26,7 +26,7 @@ const authenticateToken = async (req, res, next) => {
     }
 
     // Verificar el token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'change-me');
     const userId = decoded.id ?? decoded.userId;
 
     if (userId == null) {

@@ -5,6 +5,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { setGlobalNavigate } from './lib/navigation';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import SupervisorLayout from './layouts/SupervisorLayout';
 import EmpleadoLayout from './layouts/EmpleadoLayout';
 import ClienteLayout from './layouts/ClienteLayout';
@@ -50,6 +52,8 @@ function App() {
           React.createElement(Route, { path: '/', element: React.createElement(Navigate, { to: '/login', replace: true }) }),
           React.createElement(Route, { path: '/login', element: React.createElement(Login) }),
           React.createElement(Route, { path: '/register', element: React.createElement(Register) }),
+          React.createElement(Route, { path: '/forgot-password', element: React.createElement(ForgotPassword) }),
+          React.createElement(Route, { path: '/reset-password/:token', element: React.createElement(ResetPassword) }),
           React.createElement(Route, { path: '/supervisor', element:
             React.createElement(ProtectedRoute, { allowedRoles: ['supervisor'] },
               React.createElement(SupervisorLayout)

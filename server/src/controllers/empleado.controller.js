@@ -1,10 +1,11 @@
 import { prisma } from '../app.js';
+import { generateEmail, generatePassword } from '../utils/generateEmail.js';
 
 export const getEmpleados = async (req, res, next) => {
   try {
     const empleados = await prisma.empleado.findMany({
       include: { usuario: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { id: 'desc' }
     });
     res.json({ empleados });
   } catch (error) { next(error); }
@@ -12,7 +13,24 @@ export const getEmpleados = async (req, res, next) => {
 
 export const createEmpleado = async (req, res, next) => {
   try {
-    const { nombre, email, password, telefono } = req.body;
+    let { nombre, email, password, telefono } = req.body;
+
+    if (!nombre || nombre.trim().split(/\s+/).length < 2) {
+      return res.status(400).json({ error: 'Debe ingresar nombre y al menos un apellido' });
+    }
+
+    if (!email) {
+      email = generateEmail(nombre);
+      const existing = await prisma.usuario.findUnique({ where: { email } });
+      if (existing) {
+        email = email.replace('@', (Math.floor(Math.random() * 100) + 1) + '@');
+      }
+    }
+
+    if (!password) {
+      password = generatePassword();
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const usuario = await prisma.usuario.create({
@@ -27,7 +45,7 @@ export const createEmpleado = async (req, res, next) => {
       }
     });
 
-    res.status(201).json({ empleado, usuario });
+    res.status(201).json({ empleado, usuario, generatedPassword: password, generatedEmail: email });
   } catch (error) { next(error); }
 };
 

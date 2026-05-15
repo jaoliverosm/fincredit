@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -12,9 +12,11 @@ model Usuario {
   nombre            String
   email             String        @unique
   password          String
-  rol               Rol
+  rol               String
   activo            Boolean       @default(true)
   creadoEn          DateTime      @default(now())
+  resetToken        String?
+  resetTokenExpires DateTime?
   cliente           Cliente?
   empleado          Empleado?
   clientesRegistrados Cliente[]  @relation("ClienteRegistradoPor")
@@ -39,15 +41,15 @@ model Empleado {
 }
 
 model Cliente {
-  id             Int             @id @default(autoincrement())
-  usuarioId      Int             @unique
-  usuario        Usuario         @relation(fields: [usuarioId], references: [id])
-  cedula         String          @unique
+  id             Int      @id @default(autoincrement())
+  usuarioId      Int      @unique
+  usuario        Usuario  @relation(fields: [usuarioId], references: [id])
+  cedula         String   @unique
   telefono       String?
   empleadoId     Int?
-  empleado       Usuario?        @relation("ClienteRegistradoPor", fields: [empleadoId], references: [id])
-  estado         EstadoCliente   @default(activo)
-  fechaRegistro  DateTime        @default(now())
+  empleado       Usuario? @relation("ClienteRegistradoPor", fields: [empleadoId], references: [id])
+  estado         String   @default("activo")
+  fechaRegistro  DateTime @default(now())
   prestamos      Prestamo[]
   ventas         VentaCredito[]
   pagos          Pago[]
@@ -57,19 +59,19 @@ model Cliente {
 }
 
 model Prestamo {
-  id               Int            @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   clienteId        Int
-  cliente          Cliente        @relation(fields: [clienteId], references: [id])
+  cliente          Cliente  @relation(fields: [clienteId], references: [id])
   empleadoId       Int
-  empleado         Usuario        @relation(fields: [empleadoId], references: [id])
+  empleado         Usuario  @relation(fields: [empleadoId], references: [id])
   monto            Float
   interes          Float
   cuotas           Int
   cuotaMensual     Float
-  pagado           Float          @default(0)
-  fechaInicio      DateTime       @default(now())
+  pagado           Float    @default(0)
+  fechaInicio      DateTime @default(now())
   fechaVencimiento DateTime
-  estado           EstadoPrestamo @default(activo)
+  estado           String   @default("activo")
   observacion      String?
   pagos            Pago[]         @relation("PagoPrestamo")
 
@@ -93,23 +95,23 @@ model Articulo {
 }
 
 model VentaCredito {
-  id               Int            @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   clienteId        Int
-  cliente          Cliente        @relation(fields: [clienteId], references: [id])
+  cliente          Cliente  @relation(fields: [clienteId], references: [id])
   empleadoId       Int
-  empleado         Usuario        @relation(fields: [empleadoId], references: [id])
+  empleado         Usuario  @relation(fields: [empleadoId], references: [id])
   articuloId       Int
-  articulo         Articulo       @relation(fields: [articuloId], references: [id])
+  articulo         Articulo @relation(fields: [articuloId], references: [id])
   cantidad         Int
   precioUnitario   Float
   precioTotal      Float
   interes          Float
   cuotas           Int
   cuotaMensual     Float
-  pagado           Float          @default(0)
-  fechaVenta       DateTime       @default(now())
+  pagado           Float    @default(0)
+  fechaVenta       DateTime @default(now())
   fechaVencimiento DateTime
-  estado           EstadoPrestamo @default(activo)
+  estado           String   @default("activo")
   observacion      String?
   pagos            Pago[]         @relation("PagoVenta")
 
@@ -118,14 +120,14 @@ model VentaCredito {
 
 model Pago {
   id            Int      @id @default(autoincrement())
-  tipo          TipoPago
+  tipo          String
   referenciaId  Int
   prestamoId    Int?
   prestamo      Prestamo? @relation("PagoPrestamo", fields: [prestamoId], references: [id])
   ventaId       Int?
   venta         VentaCredito? @relation("PagoVenta", fields: [ventaId], references: [id])
   clienteId     Int
-  cliente           Cliente         @relation(fields: [clienteId], references: [id])
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
   empleadoId    Int
   empleado      Usuario  @relation(fields: [empleadoId], references: [id])
   monto         Float
@@ -137,22 +139,22 @@ model Pago {
 }
 
 model Solicitud {
-  id            Int             @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   clienteId     Int
-  cliente       Cliente         @relation(fields: [clienteId], references: [id])
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
   empleadoId    Int?
-  empleado      Usuario?        @relation("SolicitudAsignada", fields: [empleadoId], references: [id])
+  empleado      Usuario? @relation("SolicitudAsignada", fields: [empleadoId], references: [id])
   creadoPorId   Int?
-  creadoPor     Usuario?        @relation("SolicitudEnviada", fields: [creadoPorId], references: [id])
-  tipo          TipoSolicitud
+  creadoPor     Usuario? @relation("SolicitudEnviada", fields: [creadoPorId], references: [id])
+  tipo          String
   monto         Float?
   cuotas        Int?
   articuloId    Int?
-  articulo      Articulo?       @relation(fields: [articuloId], references: [id])
+  articulo      Articulo? @relation(fields: [articuloId], references: [id])
   mensaje       String?
   respuesta     String?
-  fecha         DateTime        @default(now())
-  estado        EstadoSolicitud @default(pendiente)
+  fecha         DateTime @default(now())
+  estado        String   @default("pendiente")
 
   @@map("solicitudes")
 }
@@ -166,43 +168,7 @@ model Configuracion {
   montoMinPrestamo Float @default(100000)
   nombreEmpresa   String @default("FinCredit")
   moneda          String @default("COP")
+  logoUrl         String @default("")
 
   @@map("configuracion")
-}
-
-enum Rol {
-  supervisor
-  empleado
-  cliente
-}
-
-enum EstadoCliente {
-  activo
-  mora
-  pagado
-  inactivo
-}
-
-enum EstadoPrestamo {
-  activo
-  mora
-  pagado
-}
-
-enum TipoPago {
-  prestamo
-  venta
-}
-
-enum TipoSolicitud {
-  nuevo_prestamo
-  ampliacion
-  nueva_compra
-  mensaje
-}
-
-enum EstadoSolicitud {
-  pendiente
-  aprobado
-  rechazado
 }

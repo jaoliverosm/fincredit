@@ -1,4 +1,4 @@
-import { dirname } from 'path';
+import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
@@ -10,7 +10,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -19,7 +19,6 @@ global.bcrypt = bcrypt;
 
 // Routes
 import authRoutes from './routes/auth.routes.js';
-import usuariosRoutes from './routes/usuarios.routes.js';
 import empleadoRoutes from './routes/empleado.routes.js';
 import clienteRoutes from './routes/cliente.routes.js';
 import prestamoRoutes from './routes/prestamo.routes.js';
@@ -45,6 +44,7 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
@@ -53,7 +53,6 @@ app.use('/api/', limiter);
 app.use('/api/auth', authRoutes);
 
 // Protegidas
-app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/empleados', authMiddleware, empleadoRoutes);
 app.use('/api/clientes', authMiddleware, clienteRoutes);
 app.use('/api/prestamos', authMiddleware, prestamoRoutes);

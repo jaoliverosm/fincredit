@@ -2,8 +2,8 @@ import { prisma } from '../app.js';
 
 const getClientesFilter = (req) => {
   if (req.rol === 'supervisor') return {};
-  if (req.rol === 'empleado') return { empleadoId: req.usuario.empleado?.id || 0 };
-  return { id: req.usuario.cliente?.id || 0 };
+  if (req.rol === 'empleado') return { empleadoId: req.usuarioId };
+  return { usuarioId: req.usuarioId };
 };
 
 export const getClientes = async (req, res, next) => {
@@ -12,7 +12,7 @@ export const getClientes = async (req, res, next) => {
     const clientes = await prisma.cliente.findMany({
       where,
       include: { usuario: true, empleado: { include: { usuario: true } } },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { id: 'desc' }
     });
     res.json({ clientes });
   } catch (error) { next(error); }
@@ -21,7 +21,7 @@ export const getClientes = async (req, res, next) => {
 export const createCliente = async (req, res, next) => {
   try {
     const { nombre, email, password, cedula, telefono } = req.body;
-    const empleadoId = req.rol === 'empleado' ? req.usuario.empleado?.id : req.body.empleadoId;
+    const empleadoId = req.rol === 'empleado' ? req.usuarioId : (req.body.empleadoId ? parseInt(req.body.empleadoId) : null);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const usuario = await prisma.usuario.create({
@@ -31,7 +31,7 @@ export const createCliente = async (req, res, next) => {
     const cliente = await prisma.cliente.create({
       data: {
         usuarioId: usuario.id, cedula, telefono,
-        empleadoId: parseInt(empleadoId) || null
+        empleadoId
       }
     });
 
@@ -48,7 +48,7 @@ export const getClienteById = async (req, res, next) => {
     });
     if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' });
 
-    if (req.rol === 'empleado' && cliente.empleadoId !== req.usuario.empleado?.id)
+    if (req.rol === 'empleado' && cliente.empleadoId !== req.usuarioId)
       return res.status(403).json({ error: 'No tiene acceso a este cliente' });
     if (req.rol === 'cliente' && cliente.usuarioId !== req.usuarioId)
       return res.status(403).json({ error: 'No tiene acceso a este cliente' });

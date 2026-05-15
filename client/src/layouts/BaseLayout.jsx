@@ -1,16 +1,30 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LogOut, Menu, X } from 'lucide-react';
+import { api } from '../store/authStore';
+import { LogOut, Menu, X, Landmark } from 'lucide-react';
 import Badge from '../components/ui/Badge';
 import ThemeToggle from '../components/ThemeToggle';
 import ConfirmModal from '../components/ConfirmModal';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function BaseLayout({ menuItems }) {
   const { logout, rol } = useAuthStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [showLogout, setShowLogout] = React.useState(false);
+  const [logoUrl, setLogoUrl] = React.useState('');
+  const [empresa, setEmpresa] = React.useState('FinCredit');
+
+  React.useEffect(() => {
+    api.get('/config').then(res => {
+      if (res.data?.config) {
+        setLogoUrl(res.data.config.logoUrl || '');
+        setEmpresa(res.data.config.nombreEmpresa || 'FinCredit');
+      }
+    }).catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -27,7 +41,12 @@ export default function BaseLayout({ menuItems }) {
       className: 'fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transition-transform ' + (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
     },
       React.createElement('div', { className: 'p-4 border-b flex items-center justify-between' },
-        React.createElement('h1', { className: 'text-xl font-bold text-primary-600' }, '\uD83C\uDFE6 FinCredit'),
+        React.createElement('div', { className: 'flex items-center gap-2' },
+          logoUrl
+            ? React.createElement('img', { src: API_URL + logoUrl, alt: empresa, className: 'h-8 w-auto' })
+            : React.createElement(Landmark, { className: 'text-primary-600', size: 28 }),
+          React.createElement('h1', { className: 'text-xl font-bold text-primary-600' }, empresa)
+        ),
         React.createElement('button', { onClick: () => setSidebarOpen(false), className: 'lg:hidden' },
           React.createElement(X, { size: 20 })
         )
@@ -51,7 +70,7 @@ export default function BaseLayout({ menuItems }) {
         React.createElement('button', { onClick: () => setSidebarOpen(true), className: 'lg:hidden', 'aria-label': 'Abrir men\u00FA' },
           React.createElement(Menu, { size: 24 })
         ),
-        React.createElement('h2', { className: 'text-lg font-semibold' }, 'FinCredit'),
+        React.createElement('h2', { className: 'text-lg font-semibold' }, empresa),
         React.createElement('div', { className: 'flex items-center gap-4' },
           React.createElement(ThemeToggle, null),
           React.createElement(Badge, null, rol?.toUpperCase() ?? ''),

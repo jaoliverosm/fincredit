@@ -17,8 +17,9 @@ export default function EmpleadosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [generatedInfo, setGeneratedInfo] = useState(null);
 
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', telefono: '', meta: '' });
+  const [form, setForm] = useState({ nombre: '', telefono: '', meta: '' });
 
   useEffect(() => { loadData(); }, []);
 
@@ -37,12 +38,16 @@ export default function EmpleadosPage() {
         await api.put('/empleados/' + editing.id, form);
         toast.success('Empleado actualizado');
       } else {
-        await api.post('/empleados', form);
+        const res = await api.post('/empleados', form);
+        const info = res.data;
+        if (info.generatedPassword || info.generatedEmail) {
+          setGeneratedInfo({ email: info.generatedEmail || info.usuario.email, password: info.generatedPassword });
+        }
         toast.success('Empleado creado');
       }
       setModalOpen(false);
       setEditing(null);
-      setForm({ nombre: '', email: '', password: '', telefono: '', meta: '' });
+      setForm({ nombre: '', telefono: '', meta: '' });
       loadData();
     } catch (err) { toast.error(err.response?.data?.error || 'Error'); }
   };
@@ -54,7 +59,7 @@ export default function EmpleadosPage() {
 
   const openEdit = (emp) => {
     setEditing(emp);
-    setForm({ nombre: emp.usuario.nombre, email: emp.usuario.email, password: '', telefono: emp.telefono || '', meta: emp.meta || '' });
+    setForm({ nombre: emp.usuario.nombre, telefono: emp.telefono || '', meta: emp.meta || '' });
     setModalOpen(true);
   };
 
@@ -63,7 +68,7 @@ export default function EmpleadosPage() {
   return React.createElement('div', { className: 'space-y-6' },
     React.createElement('div', { className: 'flex justify-between items-center' },
       React.createElement('h1', { className: 'text-2xl font-bold' }, 'Empleados'),
-      React.createElement(Button, { onClick: () => { setEditing(null); setForm({ nombre: '', email: '', password: '', telefono: '', meta: '' }); setModalOpen(true); } },
+      React.createElement(Button, { onClick: () => { setEditing(null); setForm({ nombre: '', telefono: '', meta: '' }); setModalOpen(true); } },
         '+ Nuevo Empleado'
       )
     ),
@@ -85,16 +90,20 @@ export default function EmpleadosPage() {
       })
     ),
 
-    React.createElement(Modal, { open: modalOpen, onClose: () => setModalOpen(false), title: editing ? 'Editar Empleado' : 'Nuevo Empleado' },
+    React.createElement(Modal, { open: modalOpen, onClose: () => { setModalOpen(false); setGeneratedInfo(null); }, title: editing ? 'Editar Empleado' : 'Nuevo Empleado' },
       React.createElement('form', { onSubmit: handleSubmit, className: 'space-y-4' },
-        React.createElement(Input, { label: 'Nombre', value: form.nombre, onChange: e => setForm({ ...form, nombre: e.target.value }), required: true }),
-        React.createElement(Input, { label: 'Email', type: 'email', value: form.email, onChange: e => setForm({ ...form, email: e.target.value }), required: true }),
-        editing ? null : React.createElement(Input, { label: 'Contraseña', type: 'password', value: form.password, onChange: e => setForm({ ...form, password: e.target.value }), required: true }),
+        React.createElement(Input, { label: 'Nombre Completo', value: form.nombre, onChange: e => setForm({ ...form, nombre: e.target.value }), required: true, placeholder: 'Ej: Jefersson Aldair Oliveros Monroy' }),
+        !editing && React.createElement('p', { className: 'text-xs text-gray-500' }, 'El email y contraseña se generarán automáticamente.'),
         React.createElement(Input, { label: 'Teléfono', value: form.telefono, onChange: e => setForm({ ...form, telefono: e.target.value }) }),
         React.createElement(Input, { label: 'Meta mensual (COP)', type: 'number', value: form.meta, onChange: e => setForm({ ...form, meta: e.target.value }) }),
+        generatedInfo && React.createElement('div', { className: 'bg-green-50 border border-green-200 rounded-lg p-3 text-sm' },
+          React.createElement('p', { className: 'font-semibold text-green-800 mb-1' }, 'Credenciales generadas:'),
+          React.createElement('p', { className: 'text-green-700' }, 'Email: ', React.createElement('strong', null, generatedInfo.email)),
+          React.createElement('p', { className: 'text-green-700' }, 'Contraseña: ', React.createElement('strong', null, generatedInfo.password))
+        ),
         React.createElement('div', { className: 'flex justify-end gap-3 mt-6' },
-          React.createElement(Button, { type: 'button', variant: 'secondary', onClick: () => setModalOpen(false) }, 'Cancelar'),
-          React.createElement(Button, { type: 'submit', variant: 'primary', disabled: !form.nombre || !form.email }, editing ? 'Guardar' : 'Crear')
+          React.createElement(Button, { type: 'button', variant: 'secondary', onClick: () => { setModalOpen(false); setGeneratedInfo(null); } }, 'Cancelar'),
+          React.createElement(Button, { type: 'submit', variant: 'primary', disabled: !form.nombre }, editing ? 'Guardar' : 'Crear')
         )
       )
     ),

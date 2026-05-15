@@ -21,7 +21,7 @@ export const createPago = async (req, res, next) => {
         tipo,
         referenciaId: refId,
         prestamoId: tipo === 'prestamo' ? refId : null,
-        ventaCreditoId: tipo === 'venta' ? refId : null,
+        ventaId: tipo === 'venta' ? refId : null,
         clienteId,
         empleadoId: req.usuarioId,
         monto: parseFloat(monto),

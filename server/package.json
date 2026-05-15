@@ -13,6 +13,9 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch --detectOpenHandles",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --detectOpenHandles"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
@@ -24,6 +27,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "multer": "^2.1.1",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.14",
     "prisma": "^5.22.0"

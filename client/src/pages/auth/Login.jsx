@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import { Mail, Lock, ArrowRight, ShieldCheck, Landmark } from 'lucide-react';
@@ -65,7 +65,7 @@ export default function Login() {
               <div className="space-y-1">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[12px] font-semibold tracking-[0.05em] text-[#444651]" htmlFor="password">CONTRASEÑA</label>
-                  <a className="text-[12px] font-semibold tracking-[0.05em] text-[#00236f] hover:text-[#1e3a8a] transition-colors" href="#">¿OLVIDASTE TU CONTRASEÑA?</a>
+                  <Link className="text-[12px] font-semibold tracking-[0.05em] text-[#00236f] hover:text-[#1e3a8a] transition-colors" to="/forgot-password">¿OLVIDASTE TU CONTRASEÑA?</Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#757682]" size={20} />

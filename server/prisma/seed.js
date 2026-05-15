@@ -137,9 +137,9 @@ async function seed() {
   // 9. Crear pagos de muestra
   await prisma.pago.createMany({
     data: [
-      { tipo: 'prestamo', referenciaId: prest1.id, prestamoId: prest1.id, ventaCreditoId: null, clienteId: cliente1.id, empleadoId: empUser1.id, monto: cuota1, metodo: 'efectivo', observacion: 'Pago cuota 1' },
-      { tipo: 'prestamo', referenciaId: prest1.id, prestamoId: prest1.id, ventaCreditoId: null, clienteId: cliente1.id, empleadoId: empUser1.id, monto: cuota1, metodo: 'transferencia', observacion: 'Pago cuota 2' },
-      { tipo: 'prestamo', referenciaId: prest2.id, prestamoId: prest2.id, ventaCreditoId: null, clienteId: cliente2.id, empleadoId: empUser2.id, monto: cuota2, metodo: 'efectivo', observacion: 'Pago cuota 1' }
+      { tipo: 'prestamo', referenciaId: prest1.id, prestamoId: prest1.id, ventaId: null, clienteId: cliente1.id, empleadoId: empUser1.id, monto: cuota1, metodo: 'efectivo', observacion: 'Pago cuota 1' },
+      { tipo: 'prestamo', referenciaId: prest1.id, prestamoId: prest1.id, ventaId: null, clienteId: cliente1.id, empleadoId: empUser1.id, monto: cuota1, metodo: 'transferencia', observacion: 'Pago cuota 2' },
+      { tipo: 'prestamo', referenciaId: prest2.id, prestamoId: prest2.id, ventaId: null, clienteId: cliente2.id, empleadoId: empUser2.id, monto: cuota2, metodo: 'efectivo', observacion: 'Pago cuota 1' }
     ]
   });
   console.log('✅ Pagos de muestra creados');
@@ -147,8 +147,8 @@ async function seed() {
   // 10. Crear solicitudes de muestra
   await prisma.solicitud.createMany({
     data: [
-      { clienteId: cliente1.id, empleadoId: empUser1.id, tipo: 'nuevo_prestamo', monto: 5000000, cuotas: 12, mensaje: 'Necesito un préstamo para negocio' },
-      { clienteId: cliente2.id, tipo: 'ampliacion', mensaje: 'Quiero ampliar mi préstamo actual' }
+      { clienteId: cliente1.id, empleadoId: empUser1.id, creadoPorId: cli1.id, tipo: 'nuevo_prestamo', monto: 5000000, cuotas: 12, mensaje: 'Necesito un préstamo para negocio' },
+      { clienteId: cliente2.id, creadoPorId: cli2.id, tipo: 'ampliacion', mensaje: 'Quiero ampliar mi préstamo actual' }
     ]
   });
   console.log('✅ Solicitudes de muestra creadas');
