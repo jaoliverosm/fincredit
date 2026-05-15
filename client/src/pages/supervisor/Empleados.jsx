@@ -23,7 +23,7 @@ export default function EmpleadosPage() {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [generatedInfo, setGeneratedInfo] = useState(null);
 
-  const [form, setForm] = useState({ nombre: '', telefono: '', meta: '' });
+  const [form, setForm] = useState({ nombre: '', cedula: '', telefono: '', meta: '' });
 
   useEffect(() => { loadData(); }, []);
 
@@ -44,14 +44,14 @@ export default function EmpleadosPage() {
       } else {
         const res = await api.post('/empleados', form);
         const info = res.data;
-        if (info.generatedPassword || info.generatedEmail) {
-          setGeneratedInfo({ email: info.generatedEmail || info.usuario.email, password: info.generatedPassword });
-        }
-        toast.success('Empleado creado');
+        const creds = { email: info.generatedEmail || info.usuario?.email, password: info.generatedPassword };
+        setGeneratedInfo(creds);
+        navigator.clipboard?.writeText('Email: ' + creds.email + '\nPass: ' + creds.password).catch(() => {});
+        toast.success('Empleado creado. Credenciales copiadas al portapapeles.');
       }
       setModalOpen(false);
       setEditing(null);
-      setForm({ nombre: '', telefono: '', meta: '' });
+      setForm({ nombre: '', cedula: '', telefono: '', meta: '' });
       loadData();
     } catch (err) { toast.error(err.response?.data?.error || 'Error'); }
   };
@@ -63,7 +63,7 @@ export default function EmpleadosPage() {
 
   const openEdit = (emp) => {
     setEditing(emp);
-    setForm({ nombre: emp.usuario.nombre, telefono: emp.telefono || '', meta: emp.meta || '' });
+    setForm({ nombre: emp.usuario.nombre, cedula: emp.cedula || '', telefono: emp.telefono || '', meta: emp.meta || '' });
     setModalOpen(true);
   };
 
@@ -71,22 +71,35 @@ export default function EmpleadosPage() {
 
   return React.createElement('div', { className: 'space-y-6' },
     React.createElement('div', { className: 'flex justify-between items-center' },
-      React.createElement('h1', { className: 'text-2xl font-bold' }, 'Empleados'),
-      React.createElement(Button, { onClick: () => { setEditing(null); setForm({ nombre: '', telefono: '', meta: '' }); setModalOpen(true); } },
+      React.createElement('h1', { className: 'text-2xl font-bold text-foreground' }, 'Empleados'),
+      React.createElement(Button, { onClick: () => { setEditing(null); setForm({ nombre: '', cedula: '', telefono: '', meta: '' }); setModalOpen(true); } },
         '+ Nuevo Empleado'
       )
     ),
+
+    generatedInfo && React.createElement('div', { className: 'bg-accent/10 border border-accent rounded-lg p-4 text-sm' },
+      React.createElement('div', { className: 'flex justify-between items-start' },
+        React.createElement('div', null,
+          React.createElement('p', { className: 'font-semibold text-accent-foreground mb-1' }, 'Últimas credenciales generadas:'),
+          React.createElement('p', { className: 'text-foreground' }, 'Email: ', React.createElement('strong', null, generatedInfo.email)),
+          React.createElement('p', { className: 'text-foreground' }, 'Contraseña: ', React.createElement('strong', null, generatedInfo.password))
+        ),
+        React.createElement('button', { onClick: () => setGeneratedInfo(null), className: 'text-muted-foreground hover:text-foreground text-lg' }, '\u00D7')
+      )
+    ),
+
     React.createElement(Card, null,
       React.createElement(Table, {
         columns: [
           { key: 'foto', label: '', render: r =>
-            React.createElement('div', { className: 'w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden' },
+            React.createElement('div', { className: 'w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden' },
               r.fotoUrl
                 ? React.createElement('img', { src: API_URL + r.fotoUrl, alt: '', className: 'w-full h-full object-cover' })
-                : React.createElement('span', { className: 'text-xs font-bold text-gray-500' }, (r.usuario?.nombre || '?').charAt(0).toUpperCase())
+                : React.createElement('span', { className: 'text-xs font-bold text-muted-foreground' }, (r.usuario?.nombre || '?').charAt(0).toUpperCase())
             )
           },
           { key: 'nombre', label: 'Nombre', render: r => r.usuario?.nombre },
+          { key: 'cedula', label: 'Cédula', render: r => r.cedula || '-' },
           { key: 'email', label: 'Email', render: r => r.usuario?.email },
           { key: 'telefono', label: 'Teléfono' },
           { key: 'direccion', label: 'Dirección', render: r => r.direccion || '-' },
@@ -105,13 +118,12 @@ export default function EmpleadosPage() {
     React.createElement(Modal, { open: modalOpen, onClose: () => { setModalOpen(false); setGeneratedInfo(null); }, title: editing ? 'Editar Empleado' : 'Nuevo Empleado' },
       React.createElement('form', { onSubmit: handleSubmit, className: 'space-y-4' },
         React.createElement(Input, { label: 'Nombre Completo', value: form.nombre, onChange: e => setForm({ ...form, nombre: e.target.value }), required: true, placeholder: 'Ej: Jefersson Aldair Oliveros Monroy' }),
-        !editing && React.createElement('p', { className: 'text-xs text-gray-500' }, 'El email y contraseña se generarán automáticamente.'),
+        React.createElement(Input, { label: 'Cédula', value: form.cedula, onChange: e => setForm({ ...form, cedula: e.target.value }), placeholder: '1234567890' }),
         React.createElement(Input, { label: 'Teléfono', value: form.telefono, onChange: e => setForm({ ...form, telefono: e.target.value }) }),
         React.createElement(Input, { label: 'Meta mensual (COP)', type: 'number', value: form.meta, onChange: e => setForm({ ...form, meta: e.target.value }) }),
-        generatedInfo && React.createElement('div', { className: 'bg-green-50 border border-green-200 rounded-lg p-3 text-sm' },
-          React.createElement('p', { className: 'font-semibold text-green-800 mb-1' }, 'Credenciales generadas:'),
-          React.createElement('p', { className: 'text-green-700' }, 'Email: ', React.createElement('strong', null, generatedInfo.email)),
-          React.createElement('p', { className: 'text-green-700' }, 'Contraseña: ', React.createElement('strong', null, generatedInfo.password))
+        !editing && React.createElement('div', { className: 'bg-muted rounded-lg p-3 text-xs text-muted-foreground' },
+          'El email y contraseña se generarán automáticamente. ',
+          'La contraseña será tu número de cédula + la primera letra de tu primer apellido.'
         ),
         React.createElement('div', { className: 'flex justify-end gap-3 mt-6' },
           React.createElement(Button, { type: 'button', variant: 'secondary', onClick: () => { setModalOpen(false); setGeneratedInfo(null); } }, 'Cancelar'),

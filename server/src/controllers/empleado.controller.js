@@ -13,7 +13,7 @@ export const getEmpleados = async (req, res, next) => {
 
 export const createEmpleado = async (req, res, next) => {
   try {
-    let { nombre, email, password, telefono, meta, direccion, fechaNacimiento, fotoUrl, hojaDeVidaUrl } = req.body;
+    let { nombre, email, password, telefono, meta, direccion, fechaNacimiento, fotoUrl, hojaDeVidaUrl, cedula } = req.body;
 
     if (!nombre || nombre.trim().split(/\s+/).length < 2) {
       return res.status(400).json({ error: 'Debe ingresar nombre y al menos un apellido' });
@@ -21,13 +21,14 @@ export const createEmpleado = async (req, res, next) => {
 
     if (!email) {
       email = generateEmail(nombre);
-      const existing = await prisma.usuario.findUnique({ where: { email } });
+      let existing = await prisma.usuario.findUnique({ where: { email } });
       if (existing) {
-        email = email.replace('@', (Math.floor(Math.random() * 100) + 1) + '@');
+        const base = email.replace(/@.*$/, '');
+        email = base + (Math.floor(Math.random() * 999) + 1) + '@fincredit.com';
       }
     }
 
-    if (!password) password = generatePassword();
+    if (!password) password = generatePassword(cedula, nombre);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const usuario = await prisma.usuario.create({
@@ -36,7 +37,7 @@ export const createEmpleado = async (req, res, next) => {
 
     const empleado = await prisma.empleado.create({
       data: {
-        usuarioId: usuario.id, telefono, meta: parseFloat(meta) || 0,
+        usuarioId: usuario.id, cedula, telefono, meta: parseFloat(meta) || 0,
         direccion, fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
         fotoUrl, hojaDeVidaUrl
       }

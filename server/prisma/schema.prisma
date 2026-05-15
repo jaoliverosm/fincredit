@@ -33,6 +33,7 @@ model Empleado {
   id              Int      @id @default(autoincrement())
   usuarioId       Int      @unique
   usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  cedula          String?
   telefono        String?
   meta            Float    @default(0)
   fechaIngreso    DateTime @default(now())

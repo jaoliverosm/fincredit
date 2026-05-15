@@ -76,3 +76,16 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
     font-family: var(--font-sans);
   }
 }
+
+/* Dark mode: standard utility overrides */
+.dark .bg-white { background-color: #0b1220 !important; }
+.dark .bg-gray-50 { background-color: #0f172a !important; }
+.dark .bg-gray-100 { background-color: #111827 !important; }
+.dark .text-gray-500 { color: #9ca3af !important; }
+.dark .text-gray-600 { color: #9ca3af !important; }
+.dark .text-gray-700 { color: #eef2ff !important; }
+.dark .text-gray-400 { color: #64748b !important; }
+.dark .border-gray-200 { border-color: rgba(255,255,255,0.1) !important; }
+.dark .border-gray-300 { border-color: rgba(255,255,255,0.15) !important; }
+.dark .hover\\:bg-gray-50:hover { background-color: #111827 !important; }
+.dark .hover\\:bg-gray-100:hover { background-color: #1e293b !important; }
