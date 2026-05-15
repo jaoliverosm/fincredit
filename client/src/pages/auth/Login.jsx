@@ -94,7 +94,12 @@ export default function Login() {
               </div>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-[#c5c5d3] flex flex-col items-center gap-4">
+            <p className="text-center mt-6 text-[14px] text-[#444651]">
+              ¿Eres cliente nuevo?{' '}
+              <a href="/register" className="text-[#00236f] font-semibold hover:underline">Regístrate aquí</a>
+            </p>
+
+            <div className="mt-6 pt-6 border-t border-[#c5c5d3] flex flex-col items-center gap-4">
               <p className="text-[14px] text-[#444651] text-center px-6">
                 Acceso restringido para personal autorizado de FinCredit. Su sesión está siendo monitoreada por seguridad.
               </p>

@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/ErrorBoundary';
 import { setGlobalNavigate } from './lib/navigation';
 import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import SupervisorLayout from './layouts/SupervisorLayout';
 import EmpleadoLayout from './layouts/EmpleadoLayout';
 import ClienteLayout from './layouts/ClienteLayout';
@@ -46,7 +47,9 @@ function App() {
         React.createElement('div', { className: 'animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600' })
       ) },
         React.createElement(Routes, null,
+          React.createElement(Route, { path: '/', element: React.createElement(Navigate, { to: '/login', replace: true }) }),
           React.createElement(Route, { path: '/login', element: React.createElement(Login) }),
+          React.createElement(Route, { path: '/register', element: React.createElement(Register) }),
           React.createElement(Route, { path: '/supervisor', element:
             React.createElement(ProtectedRoute, { allowedRoles: ['supervisor'] },
               React.createElement(SupervisorLayout)
